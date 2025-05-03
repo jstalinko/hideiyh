@@ -14,7 +14,7 @@ class EngineController extends Controller
     {
         $slug = $request->slug;
         $link = \App\Models\Link::where('shortlink', $slug)->first();
-        if (!$link) return redirect('/');
+        if (!$link) return redirect('https://javaradigital.com');
 
         // init session by ip hash
         $sessid = session()->getId();
@@ -32,7 +32,7 @@ class EngineController extends Controller
 
         // check if domain is valid
         if ($link->domain != $domain) {
-            return redirect('/')->with('error', 'Domain not allowed');
+            return abort(403, 'Invalid domain');
         }
 
 
