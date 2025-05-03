@@ -31,6 +31,7 @@ class LinkResource extends Resource
                     ->options([
                         'hwhw.pw' => 'hwhw.pw',
                         'hdmx.biz.id' => 'hdmx.biz.id',
+                        'iyh.web.id' => 'iyh.web.id'
                     ])
                     ->default('hwhw.pw')
                     ->helperText('Select the domain for your shortlink')
