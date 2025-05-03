@@ -178,12 +178,13 @@ class LinkResource extends Resource
             Tables\Columns\TextColumn::make('shortlink')
                 ->searchable()
                 ->copyable()
-                ->copyMessage('Shortlink disalin!')
+                ->copyableState(fn ($record): string => 'https://'.$record->shortlink.'.'.$record->domain)
+                ->copyMessage('Shortlink copied !')
                 ->label('Shortlink')
                 ->getStateUsing(function ($record) {
                     return new \Illuminate\Support\HtmlString('
                         <div class="flex items-center gap-2">
-                            <span>' . e($record->shortlink) . '</span>
+                            <span>' . e($record->shortlink . '.'. $record->domain) . '</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
                                 <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
@@ -195,9 +196,9 @@ class LinkResource extends Resource
                 ->label('Full URL')
                 ->copyable()
                 ->copyMessage('URL lengkap disalin!')
-                ->copyableState(fn ($record): string => $record->domain . '/' . $record->shortlink)
+                ->copyableState(fn ($record): string => env('APP_URL') . '/s/' . $record->shortlink)
                 ->getStateUsing(function ($record) {
-                    $fullUrl = $record->domain . '/' . $record->shortlink;
+                    $fullUrl = env('APP_URL') . '/s/' . $record->shortlink;
                     return new \Illuminate\Support\HtmlString('
                         <div class="flex items-center gap-2">
                             <span>' . e($fullUrl) . '</span>

@@ -63,6 +63,7 @@ class EngineController extends Controller
         if($link->block_bot && Helper::is_bot_crawlers($request->userAgent())) {
             session()->put($session,'blocked');
             session()->save();
+            
             Helper::write_log($link->user->id , $link->id, 'bot', $logData );
             return Helper::render_bot($link->bot_page_url, $link->render_bot_page_method);
         }
