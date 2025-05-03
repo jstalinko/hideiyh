@@ -58,21 +58,21 @@ class LinkResource extends Resource
                 Forms\Components\TextInput::make('bot_page_url')
                     ->required()
                     ->maxLength(255)
-                    ->default('https://javaradigital.com/default.html')
+                    ->default('https://trash.hideiyh.pw/?p=BOT_FOUND')
                     ->helperText('URL where bots/crawlers will be redirected')
                     ->placeholder('https://example.com/bot-page'),
 
                 Forms\Components\TextInput::make('white_page_url')
                     ->required()
                     ->maxLength(255)
-                    ->default('https://javaradigital.com/default.html')
+                    ->default('https://trash.hideiyh.pw/?p=WHITE_PAGE')
                     ->helperText('URL for non-targeted visitors (safe page)')
                     ->placeholder('https://example.com/safe-page'),
 
                 Forms\Components\TextInput::make('offer_page_url')
                     ->required()
                     ->maxLength(255)
-                    ->default('https://javaradigital.com/default.html')
+                    ->default('https://trash.hideiyh.pw/?p=OFFER_PAGE')
                     ->helperText('URL for your main offer/landing page for targeted visitors')
                     ->placeholder('https://example.com/offer-page'),
 

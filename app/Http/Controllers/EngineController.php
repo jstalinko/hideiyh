@@ -14,7 +14,7 @@ class EngineController extends Controller
     {
         $slug = $request->slug;
         $link = \App\Models\Link::where('shortlink', $slug)->first();
-        if (!$link) return redirect('https://javaradigital.com');
+        if (!$link) return redirect('https://trash.hideiyh.pw/?p=LINK_NOT_FOUND');
 
         // init session by ip hash
         $sessid = session()->getId();
