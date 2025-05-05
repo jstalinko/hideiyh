@@ -27,4 +27,14 @@ class HiController extends Controller
         $data['props'] = $props;
         return Inertia::render('Welcome' , $data);
     }
+
+    public function download(Request $request)
+    {
+        // download storage/app/_integration.php rename as index-$username.php
+        $username = strtolower(str_replace(' ', '_', $request->user()->name));
+        $filePath = storage_path('app/_integration.php');
+        $newFilePath = storage_path("app/index-$username.php");
+        copy($filePath, $newFilePath);
+        return response()->download($newFilePath)->deleteFileAfterSend(true);
+    }
 }

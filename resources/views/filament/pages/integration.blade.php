@@ -102,7 +102,7 @@
         <h2 class="text-xl font-bold">PHP Integration</h2>
         <x-filament::button
             tag="a"
-            href="/"
+            href="{{route('download')}}"
             target="_blank"
             color="success"
             icon="heroicon-o-cloud-arrow-down"
@@ -112,19 +112,21 @@
         </x-filament::button>
     </div>
 
-    <!-- Connected domains section -->
-    <x-filament::section>
-        <x-slot name="heading">
-            Connected domains
-        </x-slot>
-        
-        <x-slot name="description">
-            Manage domains connected to your PHP integration
-        </x-slot>
-        
-        <div class="space-y-4">
+<!-- Connected domains section -->
+<x-filament::section>
+    <x-slot name="heading">
+        Connected domains
+    </x-slot>
+    
+    <x-slot name="description">
+        Manage domains connected to your PHP integration
+    </x-slot>
+    
+    <div class="space-y-4">
+        @if(count($this->getIntegrations()) > 0)
             <!-- Domain item 1 -->
             <div class="flex items-center justify-between p-4 bg-dark rounded-lg border border-gray-200">
+               @foreach($this->getIntegrations() as $integration)
                 <div class="flex items-center">
                     <div class="h-10 w-10 rounded-full bg-primary-50 flex items-center justify-center">
                         <x-filament::icon
@@ -132,50 +134,37 @@
                             class="h-5 w-5 text-primary-500"
                         />
                     </div>
+
                     <div class="ml-4">
-                        <p class="font-medium">example.com</p>
-                        <p class="text-sm text-gray-500">Connected on May 1, 2025</p>
+                       
+                        <p class="font-medium">{{$integration->domain}}</p>
+                        <p class="text-sm text-gray-500">Connected on {{$integration->created_at->diffForHumans()}}</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-2">
-                
-                    <x-filament::button
-                        color="danger"
-                        size="sm"
-                        icon="heroicon-o-trash"
-                    >
-                        Disconnect
-                    </x-filament::button>
-                </div>
+              
+                <x-filament::button
+                    color="danger"
+                    size="sm"
+                    icon="heroicon-o-trash"
+                    wire:click="disconnectIntegration({{ $integration->id }})"
+                >
+                    Disconnect
+                </x-filament::button>
+               @endforeach
             </div>
-            
-            <!-- Domain item 2 -->
-            <div class="flex items-center justify-between p-4 bg-dark rounded-lg border border-gray-200">
-                <div class="flex items-center">
-                    <div class="h-10 w-10 rounded-full bg-primary-50 flex items-center justify-center">
-                        <x-filament::icon
-                            icon="heroicon-o-globe-alt"
-                            class="h-5 w-5 text-primary-500"
-                        />
-                    </div>
-                    <div class="ml-4">
-                        <p class="font-medium">mysite.org</p>
-                        <p class="text-sm text-gray-500">Connected on April 28, 2025</p>
-                    </div>
-                </div>
-                <div class="flex items-center space-x-2">
-                   
-                    <x-filament::button
-                        color="danger"
-                        size="sm"
-                        icon="heroicon-o-trash"
-                    >
-                        Disconnect
-                    </x-filament::button>
-                </div>
+        @else
+            <!-- Empty state when no integrations found -->
+            <div class="flex flex-col items-center justify-center py-6 text-center">
+                <x-filament::icon
+                    icon="heroicon-o-globe-alt"
+                    class="h-8 w-8 text-gray-400 mb-4"
+                />
+                <h3 class="text-lg font-medium text-gray-900">No domains connected</h3>
+                <p class="mt-1 text-sm text-gray-500">
+                    Download and install the PHP integration to connect your first domain.
+                </p>
             </div>
-            
-          
-        </div>
-    </x-filament::section>
+        @endif
+    </div>
+</x-filament::section>
 </x-filament-panels::page>

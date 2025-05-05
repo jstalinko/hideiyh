@@ -60,6 +60,8 @@ class EngineController extends Controller
             'params' => $params,
         ];
 
+        $link->clicks++;
+        $link->save();
 
         if (session()->has($session)) {
 
@@ -77,6 +79,8 @@ class EngineController extends Controller
         if ($link->block_bot && Helper::is_bot_crawlers($request->userAgent())) {
             session()->put($session, 'blocked');
             session()->save();
+            $link->bot_page_clicks++;
+            $link->save();
 
             Helper::write_log($link->user->id, $link->id, 'bot', $logData);
             return Helper::render_bot($link->bot_page_url, $link->render_bot_page_method);
@@ -87,6 +91,9 @@ class EngineController extends Controller
             if ($is_vpn || $is_proxy || $is_hosting) {
                 session()->put($session, 'blocked');
                 session()->save();
+                $link->bot_page_clicks++;
+                $link->save();
+
                 Helper::write_log($link->user->id, $link->id, 'vpn', $logData);
                 return Helper::render_bot($link->bot_page_url, $link->render_bot_page_method);
             }
@@ -96,6 +103,9 @@ class EngineController extends Controller
             if (!$referer) {
                 session()->put($session, 'blocked');
                 session()->save();
+                $link->white_page_clicks++;
+                 $link->save();
+
                 Helper::write_log($link->user->id, $link->id, 'no referer', $logData);
                 return Helper::render_white($link->white_page_url, $link->render_white_page_method);
             }
@@ -106,6 +116,8 @@ class EngineController extends Controller
             if (!in_array($countryCode, $allowed_country)) {
                 session()->put($session, 'blocked');
                 session()->save();
+                $link->white_page_clicks++;
+                $link->save();
                 Helper::write_log($link->user->id, $link->id, 'not allowed country', $logData);
                 return Helper::render_white($link->white_page_url, $link->render_white_page_method);
             }
@@ -116,6 +128,9 @@ class EngineController extends Controller
             if ($link->allowed_device != $device) {
                 session()->put($session, 'blocked');
                 session()->save();
+                $link->white_page_clicks++;
+                $link->save();
+
                 Helper::write_log($link->user->id, $link->id, 'not allowed device', $logData);
                 return Helper::render_white($link->white_page_url, $link->render_white_page_method);
             }
@@ -125,6 +140,8 @@ class EngineController extends Controller
             if ($link->allowed_platform != $platform) {
                 session()->put($session, 'blocked');
                 session()->save();
+                $link->white_page_clicks++;
+                $link->save();
                 Helper::write_log($link->user->id, $link->id, 'not allowed platform', $logData);
                 return Helper::render_white($link->white_page_url, $link->render_white_page_method);
             }
@@ -142,6 +159,9 @@ class EngineController extends Controller
             if ($paramAllowed < 1) {
                 session()->put($session, 'blocked');
                 session()->save();
+
+                $link->white_page_clicks++;
+                $link->save();
                 Helper::write_log($link->user->id, $link->id, 'not allowed params', $logData);
                 return Helper::render_white($link->white_page_url, $link->render_white_page_method);
             }
@@ -159,6 +179,8 @@ class EngineController extends Controller
             if ($antiLoopCount >= $link->anti_loop_max) {
                 session()->put($session, 'blocked');
                 session()->save();
+                $link->white_page_clicks++;
+                $link->save();
                 Helper::write_log($link->user->id, $link->id, 'anti loop', $logData);
                 return Helper::render_white($link->white_page_url, $link->render_white_page_method);
             }
@@ -166,7 +188,7 @@ class EngineController extends Controller
 
 
         Helper::write_log($link->user->id, $link->id, 'success', $logData);
-        $link->clicks++;
+        $link->offer_page_clicks++;
         $link->save();
 
         return Helper::render_offer($link->offer_page_url, false, $link->render_offer_page_method);

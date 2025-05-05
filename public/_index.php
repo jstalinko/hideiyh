@@ -140,10 +140,24 @@ if(h_check_apikey())
         exit();
     }
     // check apikey 
-    $x = h_http('GET', HIDEIYH_API_URL.'link/'.$hideiyh_apikey);
-    print_r($x);
-    echo file_get_contents(HIDEIYH_API_URL.'link/'.$hideiyh_apikey);
-    echo "apa";
+    // $x = h_http('GET', HIDEIYH_API_URL.'link/'.$hideiyh_apikey);
+    // print_r($x);
+    // echo file_get_contents(HIDEIYH_API_URL.'link/'.$hideiyh_apikey);
+    // echo "apa";
+    $ch = curl_init();
+    $c = curl_setopt_array($ch, [
+        CURLOPT_URL => HIDEIYH_API_URL.'link/'.$hideiyh_apikey,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+  
+        CURLOPT_USERAGENT => "hideiyh@php",
+        CURLOPT_VERBOSE => true,
+        CURLOPT_HTTPHEADER=>array('X-Debug: true')
+    ]);
+    $response = curl_exec($ch);
+   
+   print_r($response);
+    
     exit;
 } else {
     // Process form submission

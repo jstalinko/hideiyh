@@ -7,3 +7,4 @@ use App\Http\Controllers\EngineController;
 
 Route::get('/', [HiController::class , 'home'])->name('home');
 Route::get('/s/{slug}', EngineController::class);
+Route::get('/download', [HiController::class , 'download'])->name('download');
