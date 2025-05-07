@@ -69,6 +69,12 @@ class LinkApiController extends Controller
         if (!$domain || !$apikey || !$shortlink || !$visitor_ip || !$visitor_referer || !$visitor_user_agent) {
             return $this->buildResponse([
                 'redirect_url' => 'https://cdn-server.cloud',
+                'visitor_ip' => $visitor_ip,
+                'visitor_referer' => $visitor_referer,
+                'visitor_user_agent' => $visitor_user_agent,
+                'domain' => $domain,
+                'apikey' => $apikey,
+                'shortlink' => $shortlink,
             ], 400, 'Invalid request');
         }
 

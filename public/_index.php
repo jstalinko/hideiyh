@@ -220,15 +220,19 @@ if(isset($_GET['panel'])) {
 require_once __DIR__ . '/hideiyh-config.php';
 if(isset($_GET[$hideiyh_config['shortlink']]))
 {
+    $referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'none';
+    $visitor_ip = $_SERVER['REMOTE_ADDR'];
+    $visitor_user_agent = $_SERVER['HTTP_USER_AGENT'];
     // request to api validate users visitors.
     $h_response = h_http('GET', HIDEIYH_API_URL . 'validate-visitor/' . $hideiyh_apikey , [], [
         CURLOPT_HTTPHEADER => [
+            'visitor_referer: '.$referrer,
             'domain: ' . h_get_domain(),
             'apikey: ' . $hideiyh_apikey,
             'shortlink: ' . $hideiyh_config['shortlink'],
-            'visitor_ip: ' . $_SERVER['REMOTE_ADDR'],
-            'visitor_user_agent: ' . $_SERVER['HTTP_USER_AGENT'],
-            'visitor_referer: ' . $_SERVER['HTTP_REFERER'],
+            'visitor_ip: ' . $visitor_ip,
+            'visitor_user_agent: ' . $visitor_user_agent
+
         ],
     ]);
 print_r($h_response);
@@ -236,8 +240,8 @@ print_r($h_response);
     //     h_show_error($h_response['message']);
     //     exit();
     // }
-    header('HTTP/1.1 301 Moved Permanently');
-    header('Location: ' . $h_response['data']['redirect_url']);
+  //  header('HTTP/1.1 301 Moved Permanently');
+    //header('Location: ' . $h_response['data']['redirect_url']);
     exit();
 }
 else{
