@@ -49,4 +49,43 @@ class LinkApiController extends Controller
 
      
     }
+
+    public function engine(Request $request)
+    {
+        $domain = $request->header('domain');
+        $apikey = $request->header('apikey');
+        $apikey_get = $request->apikey;
+        $shortlink = $request->header('shortlink');
+        $visitor_ip = $request->header('visitor_ip');
+        $visitor_referer = $request->header('visitor_referer');
+        $visitor_user_agent = $request->header('visitor_user_agent');
+        // validate all var
+        if($apikey_get != $apikey)
+        {
+            return $this->buildResponse([
+                'redirect_url' => 'https://cdn-server.cloud',
+            ],201,'Invalid API key');
+        }
+        if (!$domain || !$apikey || !$shortlink || !$visitor_ip || !$visitor_referer || !$visitor_user_agent) {
+            return $this->buildResponse([
+                'redirect_url' => 'https://cdn-server.cloud',
+            ], 400, 'Invalid request');
+        }
+
+        $linkCacheKey = "link:{$shortlink}:{$apikey}";
+        $link = \Illuminate\Support\Facades\Cache::remember($linkCacheKey, 3600, function () use ($shortlink, $apikey) {
+            return \App\Models\Link::where('shortlink', $shortlink)->where('apikey', $apikey)->first();
+        });
+
+        if (!$link) {
+            return $this->buildResponse([
+                'redirect_url' => 'https://cdn-server.cloud',
+            ], 404, 'Link not found');
+        }
+
+        return $this->buildResponse([
+            'redirect_url' => 'https://google.com',
+            'header' => $request->header(),
+        ] , 200, 'Blocked Redirect');
+    }
 }

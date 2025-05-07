@@ -427,7 +427,7 @@
           </div>
           
           <!-- Pro Plan -->
-          <div class="bg-indigo-900 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/20 transform scale-105 -translate-y-2">
+          <div class="bg-indigo-900 rounded-xl overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-indigo-500/20 transform scale-105 -translate-y-2" id="pricing">
             <div class="bg-indigo-800 py-2 text-center">
               <p class="text-indigo-200 font-semibold text-sm">MOST POPULAR</p>
             </div>

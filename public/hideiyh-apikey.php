@@ -1,4 +1,4 @@
 <?php
 $hideiyh_domain = 'localhost:8000';
-$hideiyh_apikey = 'XHID-07FE93F2583587F3F30AEEE1C2991A35';
+$hideiyh_apikey = 'XHID-6485AB4455025F70227BA66B59BF64FE';
 ?>
