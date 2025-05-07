@@ -75,6 +75,7 @@ class LinkApiController extends Controller
                 'domain' => $domain,
                 'apikey' => $apikey,
                 'shortlink' => $shortlink,
+                'headers' => $request->headers->all(),
             ], 400, 'Invalid request');
         }
 
