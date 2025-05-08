@@ -30,7 +30,7 @@ class PlanResource extends Resource
                 Forms\Components\TextInput::make('name')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('slug')
+                Forms\Components\TextInput::make('link_checkout')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('description')
@@ -43,12 +43,14 @@ class PlanResource extends Resource
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('link_limit')
-                    ->required()
+                    ->default(null)
                     ->numeric(),
                 Forms\Components\TextInput::make('traffic_limit_per_day')
                     ->numeric()
                     ->default(null),
                 Forms\Components\Toggle::make('is_active')
+                    ->required(),
+                Forms\Components\Toggle::make('is_popular')
                     ->required(),
             ]);
     }
@@ -58,8 +60,6 @@ class PlanResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('slug')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('price')
                     ->money(currency:"IDR")

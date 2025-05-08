@@ -28,6 +28,7 @@ class AdminPanelProvider extends PanelProvider
             ->default()
             ->id('admin')
             ->path('dashboard')
+            ->registration()
             ->login()
             ->colors([
                 'primary' => Color::Cyan,

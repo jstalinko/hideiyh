@@ -16,7 +16,8 @@ class HiController extends Controller
             ->map(function ($plan) {
                 return [
                     'name' => $plan->name,
-                    'slug' => $plan->slug,
+                    'link_checkout' => $plan->link_checkout,
+                    'is_popular' => $plan->is_popular,
                     'description' => $plan->description,
                     'price' => $plan->price,
                     'duration_in_days' => $plan->duration_in_days,
