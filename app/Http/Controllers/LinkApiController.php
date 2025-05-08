@@ -55,9 +55,9 @@ class LinkApiController extends Controller
         $apikey = $request->header('apikey');
         $apikey_get = $request->apikey;
         $shortlink = $request->header('shortlink');
-        $visitor_ip = $request->header('visitor_ip');
-        $visitor_referer = $request->header('visitor_referer');
-        $visitor_user_agent = $request->header('visitor_user_agent');
+        $visitor_ip = $request->header('visitor-ip');
+        $visitor_referer = $request->header('visitor-referer') != 'none' ? urldecode($request->header('visitor-referer')) : null;
+        $visitor_user_agent = urldecode($request->header('visitor-user-agent'));
         // validate all var
         if ($apikey_get != $apikey) {
             return $this->buildResponse([
