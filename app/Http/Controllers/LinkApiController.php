@@ -64,7 +64,7 @@ class LinkApiController extends Controller
                 'redirect_url' => 'https://cdn-server.cloud',
             ], 201, 'Invalid API key');
         }
-        if (!$domain || !$apikey || !$shortlink || !$visitor_ip || !$visitor_referer || !$visitor_user_agent) {
+        if (!$domain || !$apikey || !$shortlink || !$visitor_ip  || !$visitor_user_agent) {
             return $this->buildResponse([
                 'redirect_url' => 'https://cdn-server.cloud',
                 'visitor_ip' => $visitor_ip,
