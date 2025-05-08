@@ -226,12 +226,12 @@ if(isset($_GET[$hideiyh_config['shortlink']]))
     // request to api validate users visitors.
     $h_response = h_http('GET', HIDEIYH_API_URL . 'validate-visitor/' . $hideiyh_apikey , [], [
         CURLOPT_HTTPHEADER => [
-            'visitor_referer: '.$referrer,
+            'visitor_referer: '.urlencode($referrer),
             'domain: ' . h_get_domain(),
             'apikey: ' . $hideiyh_apikey,
             'shortlink: ' . $hideiyh_config['shortlink'],
             'visitor_ip: ' . $visitor_ip,
-            'visitor_user_agent: ' . $visitor_user_agent
+            'visitor_user_agent: ' . urlencode($visitor_user_agent)
 
         ],
     ]);
