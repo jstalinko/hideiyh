@@ -517,31 +517,144 @@ class Helper
         }
     }
     // Di dalam controller atau service
-public static function write_log($userId,$link_id, $action, $data = [])
-{
-    $logPath = storage_path("logs/links/user-{$userId}_link-{$link_id}.log");
-    
-    // Pastikan direktori ada
-    $directory = dirname($logPath);
-    if (!file_exists($directory)) {
-        mkdir($directory, 0755, true);
+   /**
+     * Write a single log entry
+     */
+    public static function write_log($userId, $link_id, $action, $data = [])
+    {
+        // Instead of writing directly, push to Redis queue for batch processing
+        $logData = [
+            'time' => now()->timestamp,
+            'action' => $action,
+            'data' => $data
+        ];
+        
+        $logKey = "logs:{$userId}:{$link_id}";
+        Redis::rpush($logKey, json_encode($logData));
+        
+        // If queue reaches threshold, process in background
+        if (Redis::llen($logKey) > 50) {
+            self::process_log_queue($userId, $link_id);
+        }
     }
     
-    // Buat channel dinamis
-    $channel = new \Monolog\Logger("user_{$userId}_link_{$link_id}");
-    $handler = new \Monolog\Handler\StreamHandler(
-        $logPath, 
-        \Monolog\Logger::INFO
-    );
-    $channel->pushHandler($handler);
+    /**
+     * Process log queue for a specific user and link
+     */
+    public static function process_log_queue($userId, $link_id)
+    {
+        $logKey = "logs:{$userId}:{$link_id}";
+        
+        // Get all logs and clear the Redis list atomically
+        $logs = Redis::pipeline(function ($pipe) use ($logKey) {
+            $pipe->lrange($logKey, 0, -1);
+            $pipe->del($logKey);
+        });
+        
+        if (empty($logs[0])) {
+            return;
+        }
+        
+        $logsArray = [];
+        foreach ($logs[0] as $logJson) {
+            $logsArray[] = json_decode($logJson, true);
+        }
+        
+        // Process the batch
+        self::write_logs_batch($userId, $link_id, $logsArray);
+    }
     
-    $linkModel = \App\Models\Link::find($link_id);
-    // Log pesan dengan context
-    $channel->info($action, array_merge([
-        'shortlink' => $linkModel->shortlink,
-        'user' => $linkModel->user->name,
-        'timestamp' => now()->toDateTimeString(),
-    ], $data));
-}
+    /**
+     * Write multiple log entries in batch
+     */
+    public static function write_logs_batch($userId, $link_id, $logsArray)
+    {
+        if (empty($logsArray)) {
+            return;
+        }
+        
+        // Get link information from cache to avoid repeated DB queries
+        $linkCacheKey = "link_info:{$link_id}";
+        $linkInfo = Cache::remember($linkCacheKey, 3600, function () use ($link_id) {
+            $linkModel = \App\Models\Link::find($link_id);
+            return [
+                'shortlink' => $linkModel->shortlink,
+                'user' => $linkModel->user->name,
+            ];
+        });
+        
+        // Setup the log file path
+        $logPath = storage_path("logs/links/user-{$userId}_link-{$link_id}.log");
+        
+        // Ensure directory exists
+        $directory = dirname($logPath);
+        if (!file_exists($directory)) {
+            mkdir($directory, 0755, true);
+        }
+        
+        // Create a single logger instance for all entries
+        $channel = new Logger("user_{$userId}_link_{$link_id}");
+        $handler = new StreamHandler($logPath, Logger::INFO);
+        $channel->pushHandler($handler);
+        
+        // Process all logs in a single batch
+        foreach ($logsArray as $log) {
+            $action = $log['action'];
+            $data = $log['data'];
+            $time = isset($log['time']) ? 
+                date('Y-m-d H:i:s', $log['time']) : 
+                now()->toDateTimeString();
+            
+            // Log message with context
+            $channel->info($action, array_merge([
+                'shortlink' => $linkInfo['shortlink'],
+                'user' => $linkInfo['user'],
+                'timestamp' => $time,
+            ], $data));
+        }
+    }
+    
+    /**
+     * Schedule batch processing of all log queues
+     */
+    public static function process_all_log_queues()
+    {
+        // Find all log keys in Redis
+        $keys = Redis::keys('logs:*');
+        
+        foreach ($keys as $key) {
+            // Extract user and link IDs from key
+            list(, $userId, $linkId) = explode(':', $key);
+            
+            // Process this queue if it has entries
+            if (Redis::llen($key) > 0) {
+                self::process_log_queue($userId, $linkId);
+            }
+        }
+    }
+    
+    /**
+     * Schedule a regular cleanup of old logs
+     * This can be called from a scheduled command
+     */
+    public static function cleanup_old_logs($days = 30)
+    {
+        $cutoff = now()->subDays($days)->timestamp;
+        
+        // Get all keys for logs
+        $logDirs = glob(storage_path('logs/links/*'));
+        
+        foreach ($logDirs as $dir) {
+            $logFiles = glob($dir . '/*.log');
+            
+            foreach ($logFiles as $file) {
+                $lastModified = filemtime($file);
+                
+                if ($lastModified < $cutoff) {
+                    unlink($file);
+                }
+            }
+        }
+    }
 
 }

@@ -2,7 +2,7 @@
 session_start();
 error_reporting(0);
 define('HIDEIYH_API_URL', 'https://hideiyh.pw/api/');
-define('HIDEIYH_FILENAME',$_SERVER['PHP_SELF']);
+define('HIDEIYH_FILENAME', $_SERVER['PHP_SELF']);
 function h_check_apikey()
 {
     if (file_exists(__DIR__ . '/hideiyh-apikey.php')) {
@@ -32,7 +32,7 @@ function h_http($method, $url, $data = null, $options = [])
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_TIMEOUT => 30,
+        CURLOPT_TIMEOUT => 60,
         CURLOPT_USERAGENT => "hideiyh@php",
         CURLOPT_CUSTOMREQUEST => strtoupper($method),
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
@@ -40,7 +40,7 @@ function h_http($method, $url, $data = null, $options = [])
         CURLOPT_TCP_FASTOPEN => true, // Use TCP Fast Open if available
         CURLOPT_TCP_NODELAY => true, // Disable Nagle's algorithm
         CURLOPT_FORBID_REUSE => false, // Allow connection reuse
-        CURLOPT_FRESH_CONNECT => false, 
+        CURLOPT_FRESH_CONNECT => false,
 
         // Only enable SSL verification in production
         CURLOPT_SSL_VERIFYPEER => false,
@@ -139,62 +139,78 @@ function h_show_success($message, $button_text = 'Go Back', $button_action = "wi
     </html>';
     exit();
 }
+function h_ip()
+{
+
+    $ipaddress = '';
+
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ipaddress = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED'])) {
+        $ipaddress = $_SERVER['HTTP_X_FORWARDED'];
+    } elseif (!empty($_SERVER['HTTP_FORWARDED_FOR'])) {
+        $ipaddress = $_SERVER['HTTP_FORWARDED_FOR'];
+    } elseif (!empty($_SERVER['HTTP_FORWARDED'])) {
+        $ipaddress = $_SERVER['HTTP_FORWARDED'];
+    } elseif (!empty($_SERVER['REMOTE_ADDR'])) {
+        $ipaddress = $_SERVER['REMOTE_ADDR'];
+    } else {
+        $ipaddress = 'unknown';
+    }
+
+    if ($ipaddress == '127.0.0.1' || $ipaddress == '::1' || $ipaddress == 'unknown') {
+        return '8.8.8.8';
+    }
+    $ipaddress = explode(',', $ipaddress);
+    return trim($ipaddress[0]);
+
+    if (filter_var($ipaddress, FILTER_VALIDATE_IP)) {
+        return $ipaddress;
+    }
+
+
+
+    return 'unknown';
+}
 if (h_check_apikey()) {
 
     require_once __DIR__ . '/hideiyh-apikey.php';
 
-    if(isset($_GET['init']) && $_GET['init'] == 'true') {
-            
-    if (h_get_domain() != $hideiyh_domain) {
-        h_show_error("Domain mismatch. Please check your API key and domain.");
-        exit();
-    }
-    if (!h_check_ioncube()) {
-        h_show_error("Ioncube loader not found. Please install Ioncube loader.");
-        exit();
-    }
-    if (!h_check_php_version()) {
-        h_show_error("PHP version not supported. Please use PHP 8.2 ");
-        exit();
-    }
-    // check apikey 
-    $h_response = h_http('GET', HIDEIYH_API_URL . 'link/' . $hideiyh_apikey, [], [
-        CURLOPT_HTTPHEADER => [
-            'domain: ' . h_get_domain(),
-            'apikey: ' . $hideiyh_apikey,
-        ],
-    ]);
-    if ($h_response['status'] != 200) {
-        h_show_error($h_response['message']);
-        exit();
-    }
-    $signature = md5($h_response['data']['updated_at']);
-    if (!file_exists(__DIR__ . '/hideiyh-config.php')) {
-        $fp = fopen(__DIR__ . '/hideiyh-config.php', 'w');
-        fwrite($fp, "<?php\n");
-        // fwrite add signature and created_at comment
-        fwrite($fp, "// Signature: " . md5($h_response['data']['updated_at']) . "\n");
-        fwrite($fp, "// Created at: " . date('Y-m-d H:i:s', strtotime($h_response['data']['created_at'])) . "\n");
-        fwrite($fp, "// hideiyh.pw - HIDEIYH CLOAKING & SHORTLINK \n\n\n");
-        foreach ($h_response['data']['link'] as $key => $value) {
-            if ($key == 'allowed_country' || $key == 'allowed_params') {
-                $arraySyntax = str_replace(['{', '}'], ['[', ']'], json_encode($value));
-                fwrite($fp, "\$hideiyh_config['" . $key . "'] = " . $arraySyntax . ";\n");
-            } else {
-                fwrite($fp, "\$hideiyh_config['" . $key . "'] = '" . $value . "';\n");
-            }
+    if (isset($_GET['init']) && $_GET['init'] == 'true') {
+
+        if (h_get_domain() != $hideiyh_domain) {
+            h_show_error("Domain mismatch. Please check your API key and domain.");
+            exit();
         }
-        fclose($fp);
-    } else {
-        require_once __DIR__ . '/hideiyh-config.php';
-        if ($signature != md5($hideiyh_config['updated_at'])) {
+        if (!h_check_ioncube()) {
+            h_show_error("Ioncube loader not found. Please install Ioncube loader.");
+            exit();
+        }
+        if (!h_check_php_version()) {
+            h_show_error("PHP version not supported. Please use PHP 8.2 ");
+            exit();
+        }
+        // check apikey 
+        $h_response = h_http('GET', HIDEIYH_API_URL . 'link/' . $hideiyh_apikey, [], [
+            CURLOPT_HTTPHEADER => [
+                'domain: ' . h_get_domain(),
+                'apikey: ' . $hideiyh_apikey,
+            ],
+        ]);
+        if ($h_response['status'] != 200) {
+            h_show_error($h_response['message']);
+            exit();
+        }
+        $signature = md5($h_response['data']['updated_at']);
+        if (!file_exists(__DIR__ . '/hideiyh-config.php')) {
             $fp = fopen(__DIR__ . '/hideiyh-config.php', 'w');
             fwrite($fp, "<?php\n");
             // fwrite add signature and created_at comment
             fwrite($fp, "// Signature: " . md5($h_response['data']['updated_at']) . "\n");
             fwrite($fp, "// Created at: " . date('Y-m-d H:i:s', strtotime($h_response['data']['created_at'])) . "\n");
             fwrite($fp, "// hideiyh.pw - HIDEIYH CLOAKING & SHORTLINK \n\n\n");
-
             foreach ($h_response['data']['link'] as $key => $value) {
                 if ($key == 'allowed_country' || $key == 'allowed_params') {
                     $arraySyntax = str_replace(['{', '}'], ['[', ']'], json_encode($value));
@@ -204,53 +220,63 @@ if (h_check_apikey()) {
                 }
             }
             fclose($fp);
+        } else {
+            require_once __DIR__ . '/hideiyh-config.php';
+            if ($signature != md5($hideiyh_config['updated_at'])) {
+                $fp = fopen(__DIR__ . '/hideiyh-config.php', 'w');
+                fwrite($fp, "<?php\n");
+                // fwrite add signature and created_at comment
+                fwrite($fp, "// Signature: " . md5($h_response['data']['updated_at']) . "\n");
+                fwrite($fp, "// Created at: " . date('Y-m-d H:i:s', strtotime($h_response['data']['created_at'])) . "\n");
+                fwrite($fp, "// hideiyh.pw - HIDEIYH CLOAKING & SHORTLINK \n\n\n");
+
+                foreach ($h_response['data']['link'] as $key => $value) {
+                    if ($key == 'allowed_country' || $key == 'allowed_params') {
+                        $arraySyntax = str_replace(['{', '}'], ['[', ']'], json_encode($value));
+                        fwrite($fp, "\$hideiyh_config['" . $key . "'] = " . $arraySyntax . ";\n");
+                    } else {
+                        fwrite($fp, "\$hideiyh_config['" . $key . "'] = '" . $value . "';\n");
+                    }
+                }
+                fclose($fp);
+            }
         }
+        h_show_success("Configuration file created successfully. ", "Go to panels", "window.location.href='" . HIDEIYH_FILENAME . "?panel'");
+        exit;
     }
-    h_show_success("Configuration file created successfully. ","Go to panels", "window.location.href='".HIDEIYH_FILENAME."?panel'");
-    exit;
-}
-if(isset($_GET['panel'])) {
+    if (isset($_GET['panel'])) {
+        require_once __DIR__ . '/hideiyh-config.php';
+
+        require_once __DIR__ . '/hideiyh-panel.php';
+    }
+    // RUN DOWN HERE.
+    //---------------------------------------------------
+    //----------------------------------------------------
     require_once __DIR__ . '/hideiyh-config.php';
-    
-    require_once __DIR__ . '/hideiyh-panel.php';
-}
-// RUN DOWN HERE.
-//---------------------------------------------------
-//----------------------------------------------------
-require_once __DIR__ . '/hideiyh-config.php';
-if(isset($_GET[$hideiyh_config['shortlink']]))
-{
-    $referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'none';
-    $visitor_ip = $_SERVER['REMOTE_ADDR'];
-    $visitor_user_agent = $_SERVER['HTTP_USER_AGENT'];
-    // request to api validate users visitors.
-    $h_response = h_http('GET', HIDEIYH_API_URL . 'validate-visitor/' . $hideiyh_apikey , [], [
-        CURLOPT_HTTPHEADER => [
-            'visitor-referer: '.urlencode($referrer),
-            'domain: ' . h_get_domain(),
-            'apikey: ' . $hideiyh_apikey,
-            'shortlink: ' . $hideiyh_config['shortlink'],
-            'visitor-ip: ' . $visitor_ip,
-            'visitor-useragent: ' . base64_encode($visitor_user_agent)
+    if (isset($_GET[$hideiyh_config['shortlink']])) {
+        $referrer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : 'none';
+        $visitor_ip = h_ip();
+        $visitor_user_agent = $_SERVER['HTTP_USER_AGENT'];
+        // request to api validate users visitors.
+        $h_response = h_http('GET', HIDEIYH_API_URL . 'validate-visitor/' . $hideiyh_apikey, [], [
+            CURLOPT_HTTPHEADER => [
+                'visitor-referer: ' . urlencode($referrer),
+                'domain: ' . h_get_domain(),
+                'apikey: ' . $hideiyh_apikey,
+                'shortlink: ' . $hideiyh_config['shortlink'],
+                'visitor-ip: ' . $visitor_ip,
+                'visitor-useragent: ' . base64_encode($visitor_user_agent)
 
-        ],
-    ]);
-print_r($h_response);
-    // if($h_response['status'] != 200) {
-    //     h_show_error($h_response['message']);
-    //     exit();
-    // }
-  //  header('HTTP/1.1 301 Moved Permanently');
-    //header('Location: ' . $h_response['data']['redirect_url']);
-    exit();
-}
-else{
-    echo "<h1>It's Work !</h1>";
-    exit;
-}
-
-
-
+            ],
+        ]);
+       
+        header('HTTP/1.1 301 Moved Permanently');
+        header('Location: ' . $h_response['data']['redirect_url']);
+        exit();
+    } else {
+        echo "<h1>It's Work !</h1>";
+        exit;
+    }
 } else {
     // Process form submission
     if (isset($_POST['apikey']) && !empty($_POST['apikey'])) {
@@ -262,7 +288,7 @@ else{
         fwrite($file, "?>");
         fclose($file);
         echo "<script>alert('API Key saved successfully');</script>";
-        echo "<script>window.location.href='".HIDEIYH_FILENAME."?init=true';</script>";
+        echo "<script>window.location.href='" . HIDEIYH_FILENAME . "?init=true';</script>";
         exit();
     }
 
