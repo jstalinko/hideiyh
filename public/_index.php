@@ -231,7 +231,7 @@ if(isset($_GET[$hideiyh_config['shortlink']]))
             'apikey: ' . $hideiyh_apikey,
             'shortlink: ' . $hideiyh_config['shortlink'],
             'visitor-ip: ' . $visitor_ip,
-            'visitor-useragent: ' . urlencode($visitor_user_agent)
+            'visitor-useragent: ' . base64_encode($visitor_user_agent)
 
         ],
     ]);
