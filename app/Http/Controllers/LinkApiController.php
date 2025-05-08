@@ -69,7 +69,7 @@ class LinkApiController extends Controller
                 'redirect_url' => 'https://cdn-server.cloud',
                 'visitor_ip' => $visitor_ip,
                 'visitor_referer' => $visitor_referer ?? 'none',
-                'visitor_user_agent' => $visitor_user_agent ?? 'none',
+                'visitor_user_agent' => $visitor_user_agent,
                 'domain' => $domain,
                 'apikey' => $apikey,
                 'shortlink' => $shortlink,
