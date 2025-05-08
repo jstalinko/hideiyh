@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Support\Facades\Redis;
+
 class Helper
 {
     public static function countryList(): array
