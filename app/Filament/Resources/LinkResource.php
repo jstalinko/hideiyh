@@ -7,6 +7,7 @@ use Filament\Forms;
 use App\Models\Link;
 use Filament\Tables;
 use Filament\Forms\Form;
+use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
@@ -176,12 +177,12 @@ class LinkResource extends Resource
     {
         return $table
         ->columns([
-            Tables\Columns\TextColumn::make('shortlink')
+            Tables\Columns\TextColumn::make('full_url')
                 ->searchable()
                 ->copyable()
                 ->copyableState(fn ($record): string => 'https://'.$record->shortlink.'.'.$record->domain)
                 ->copyMessage('Shortlink copied !')
-                ->label('Shortlink')
+                ->label('Short Url')
                 ->getStateUsing(function ($record) {
                     return new \Illuminate\Support\HtmlString('
                         <div class="flex items-center gap-2">
@@ -193,13 +194,13 @@ class LinkResource extends Resource
                         </div>
                     ');
                 })->badge(),
-            Tables\Columns\TextColumn::make('full_url')
-                ->label('Full URL')
+            Tables\Columns\TextColumn::make('shortlink')
+                ->label('Shortlink ID')
                 ->copyable()
-                ->copyMessage('URL lengkap disalin!')
-                ->copyableState(fn ($record): string => env('APP_URL') . '/s/' . $record->shortlink)
+                ->copyMessage('Shortlink ID copied!')
+                ->copyableState(fn ($record): string =>  $record->shortlink)
                 ->getStateUsing(function ($record) {
-                    $fullUrl = env('APP_URL') . '/s/' . $record->shortlink;
+                    $fullUrl = $record->shortlink;
                     return new \Illuminate\Support\HtmlString('
                         <div class="flex items-center gap-2">
                             <span>' . e($fullUrl) . '</span>
@@ -242,12 +243,17 @@ class LinkResource extends Resource
                 CopyAction::make()
                 ->label('API Key')
                 ->copyable(fn ($record) => $record->apikey ?? 'Upgrade Plan to get API Key :D')
-                ->successNotificationMessage('API Key copied to clipboard!')->color('success')
-            ])
+                ->successNotificationMessage('API Key copied to clipboard!')->color('success'),
+                Tables\Actions\Action::make('stats')
+                    ->label('Stats')
+                    ->url(fn (Link $record): string =>  route('filament.admin.resources.links.stats', $record))
+                    ->icon('heroicon-o-chart-bar')
+                    ->color('primary'),
+            ], position: ActionsPosition::BeforeColumns)
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                // Tables\Actions\BulkActionGroup::make([
+                //     Tables\Actions\DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
@@ -265,6 +271,7 @@ class LinkResource extends Resource
             'create' => Pages\CreateLink::route('/create'),
             'view' => Pages\ViewLink::route('/{record}'),
             'edit' => Pages\EditLink::route('/{record}/edit'),
+            'stats' => Pages\StatsLink::route('/{record}/stats'),
         ];
     }
 }

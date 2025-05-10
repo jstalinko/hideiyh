@@ -2,6 +2,9 @@
 
 namespace App;
 
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Redis;
 
 class Helper
@@ -532,7 +535,7 @@ class Helper
         ];
         
         $logKey = "logs:{$userId}:{$link_id}";
-        Redis::rpush($logKey, json_encode($logData));
+         Redis::rpush($logKey, json_encode($logData));
         
         // If queue reaches threshold, process in background
         if (Redis::llen($logKey) > 50) {

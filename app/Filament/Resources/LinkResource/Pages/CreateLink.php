@@ -12,8 +12,8 @@ class CreateLink extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['allowed_country'] = isset($data['allowed_country']) ? json_encode($data['allowed_country']) : '[]';
-        $data['allowed_params'] = isset($data['allowed_params']) ? json_encode($data['allowed_params']) : '[]';
+        $data['allowed_country'] = isset($data['allowed_country']) ? json_encode($data['allowed_country']) : json_encode([]);
+        $data['allowed_params'] = isset($data['allowed_params']) ? json_encode($data['allowed_params']) : json_encode([]);
         $data['user_id'] = auth()->user()->id;
 
         // protect with plan

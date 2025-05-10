@@ -21,6 +21,7 @@ class EngineController extends Controller
         $session = md5(Helper::ip() . $sessid);
 
         $host = $request->getHost();              // e.g. "lb2fjs.hwhw.pw"
+        if($host != "localhost"){
         $parts = explode('.', $host);            // ["lb2fjs", "hwhw", "pw"]
 
         if (count($parts) >= 3) {
@@ -33,6 +34,7 @@ class EngineController extends Controller
         // check if domain is valid
         if ($link->domain != $domain) {
             return abort(403, 'Invalid domain');
+        }
         }
 
 
