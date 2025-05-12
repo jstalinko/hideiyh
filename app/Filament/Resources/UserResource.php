@@ -83,8 +83,8 @@ class UserResource extends Resource implements HasShieldPermissions
                     ->searchable(),
                 Tables\Columns\TextColumn::make('telegram')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('email_verified_at')
-                    ->dateTime()
+                Tables\Columns\TextColumn::make('roles.name')
+                    ->badge()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()

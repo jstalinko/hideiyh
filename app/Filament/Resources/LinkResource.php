@@ -42,7 +42,7 @@ class LinkResource extends Resource implements HasShieldPermissions
 
     protected static ?int $navigationSort = 3;
 
- /*      public static function getEloquentQuery(): Builder
+      public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery();
         
@@ -54,7 +54,7 @@ class LinkResource extends Resource implements HasShieldPermissions
         
         // For non-super_admin users, only show their own links
         return $query->where('user_id', auth()->id());
-    } */
+    }
     public static function form(Form $form): Form
     {
         return $form

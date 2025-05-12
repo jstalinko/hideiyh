@@ -16,6 +16,8 @@ class DashboardStatWidget extends BaseWidget
     {
         return [
             Stat::make('Total All Traffics' , Link::sum('clicks')),
+            Stat::make('Total All Links',Link::count()),
+            
             
         ];
     }
