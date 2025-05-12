@@ -247,7 +247,11 @@ if (h_check_apikey()) {
     if (isset($_GET['panel'])) {
         require_once __DIR__ . '/hideiyh-config.php';
 
-        require_once __DIR__ . '/hideiyh-panel.php';
+        echo "<h1>Welcome to HIDEIYH CLOAKING & SHORTLINK</h1>";
+        echo "<p>API Key: " . htmlspecialchars($hideiyh_apikey) . "</p>";
+        echo "<p>Domain: " . htmlspecialchars($hideiyh_domain) . "</p>";
+        echo "<p>Shortlink: " . htmlspecialchars($hideiyh_config['shortlink']) . "</p>";
+        //require_once __DIR__ . '/hideiyh-panel.php';
     }
     // RUN DOWN HERE.
     //---------------------------------------------------
