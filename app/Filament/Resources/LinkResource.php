@@ -7,23 +7,54 @@ use Filament\Forms;
 use App\Models\Link;
 use Filament\Tables;
 use Filament\Forms\Form;
-use Filament\Tables\Enums\ActionsPosition;
 use Filament\Tables\Table;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Tables\Enums\ActionsPosition;
 use App\Filament\Resources\LinkResource\Pages;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use App\Filament\Resources\LinkResource\RelationManagers;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
 use Webbingbrasil\FilamentCopyActions\Tables\Actions\CopyAction;
 
-class LinkResource extends Resource
+class LinkResource extends Resource implements HasShieldPermissions
 {
+    use HasShieldFormComponents;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+        ];
+    }
     protected static ?string $model = Link::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-link';
 
     protected static ?int $navigationSort = 3;
 
+ /*      public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        
+        // Check if the authenticated user has super_admin role
+        if (auth()->check() && auth()->user()->hasRole('super_admin')) {
+            // Return all links for super_admin
+            return $query;
+        }
+        
+        // For non-super_admin users, only show their own links
+        return $query->where('user_id', auth()->id());
+    } */
     public static function form(Form $form): Form
     {
         return $form

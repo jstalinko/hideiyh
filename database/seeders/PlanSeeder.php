@@ -9,7 +9,7 @@ class PlanSeeder extends Seeder
 {
     /**
      *    $table->string('name');
-            $table->string('slug')->unique();
+            $table->string('link_checkout')->unique();
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
             $table->integer('duration_in_days');
@@ -23,7 +23,7 @@ class PlanSeeder extends Seeder
         $plans = [
             [
                 'name' => 'Free Trial',
-                'slug' => 'free-trial',
+                'link_checkout' => 'free-trial',
                 'description' => 'Perfect for getting started with our service.',
                 'price' => 0.00,
                 'duration_in_days' => 2,
@@ -33,7 +33,7 @@ class PlanSeeder extends Seeder
             ],
             [
                 'name' => 'Basic Plan',
-                'slug' => 'basic-plan',
+                'link_checkout' => 'basic-plan',
                 'description' => 'Ideal for individuals and small teams.',
                 'price' => 190000.00,
                 'duration_in_days' => 30,
@@ -43,7 +43,7 @@ class PlanSeeder extends Seeder
             ],
             [
                 'name' => 'Pro Plan',
-                'slug' => 'pro-plan',
+                'link_checkout' => 'pro-plan',
                 'description' => 'Best for growing businesses and teams.',
                 'price' => 250000.00,
                 'duration_in_days' => 30,
@@ -53,7 +53,7 @@ class PlanSeeder extends Seeder
             ],
             [
                 'name' => 'Enterprise Plan',
-                'slug' => 'enterprise-plan',
+                'link_checkout' => 'enterprise-plan',
                 'description' => 'Custom solutions for large organizations.',
                 'price' => 500000.00,
                 'duration_in_days' => 30,
@@ -65,7 +65,7 @@ class PlanSeeder extends Seeder
         foreach ($plans as $plan) {
             \App\Models\Plan::create([
                 'name' => $plan['name'],
-                'slug' => $plan['slug'],
+                'link_checkout' => $plan['link_checkout'],
                 'description' => $plan['description'],
                 'price' => $plan['price'],
                 'duration_in_days' => $plan['duration_in_days'],

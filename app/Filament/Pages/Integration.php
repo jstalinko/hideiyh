@@ -2,11 +2,13 @@
 
 namespace App\Filament\Pages;
 
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 use Filament\Pages\Page;
 use Filament\Notifications\Notification;
 
 class Integration extends Page
 {
+    use HasPageShield;
     protected static ?string $navigationIcon = 'heroicon-o-share';
 
     protected static string $view = 'filament.pages.integration';

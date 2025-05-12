@@ -4,9 +4,11 @@ namespace App\Filament\Pages;
 
 use Filament\Pages\Page;
 use App\Models\Subscription;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
 
 class MySubscription extends Page
 {
+    use HasPageShield;
     protected static ?string $navigationIcon = 'heroicon-c-bell';
 
     protected static string $view = 'filament.pages.my-subscription';

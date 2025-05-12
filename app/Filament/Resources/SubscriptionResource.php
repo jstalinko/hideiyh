@@ -2,19 +2,37 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SubscriptionResource\Pages;
-use App\Filament\Resources\SubscriptionResource\RelationManagers;
-use App\Models\Subscription;
 use Filament\Forms;
-use Filament\Forms\Form;
-use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Forms\Form;
 use Filament\Tables\Table;
+use App\Models\Subscription;
+use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use BezhanSalleh\FilamentShield\Traits\HasPageShield;
+use App\Filament\Resources\SubscriptionResource\Pages;
+use BezhanSalleh\FilamentShield\Contracts\HasShieldPermissions;
+use BezhanSalleh\FilamentShield\Traits\HasShieldFormComponents;
+use App\Filament\Resources\SubscriptionResource\RelationManagers;
 
-class SubscriptionResource extends Resource
+class SubscriptionResource extends Resource implements HasShieldPermissions
 {
+    use HasShieldFormComponents;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    public static function getPermissionPrefixes(): array
+    {
+        return [
+            'view',
+            'view_any',
+            'create',
+            'update',
+            'delete',
+            'delete_any',
+        ];
+    }
     protected static ?string $model = Subscription::class;
 
     protected static ?string $navigationIcon = 'heroicon-m-square-3-stack-3d';
