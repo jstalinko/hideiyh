@@ -218,7 +218,7 @@ class Helper
             'ZW' => 'Zimbabwe',
         ];
     }
-    public static function platform($method = 'device' , $ua)
+    public static function platform($method = 'device', $ua)
     {
         $user_agent = $ua;
         $platform = 'Unknown';
@@ -376,6 +376,23 @@ class Helper
         } else {
             $offer = $offer;
         }
+        if ($method === 'lorem') {
+            header('Content-Type: text/html; charset=UTF-8');
+            echo "<!DOCTYPE html>
+             <html lang='en'>
+             <head>
+                 <meta charset='UTF-8'>
+                 <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+                 <title>Lorem Ipsum</title>
+             </head>
+             <body>
+                 <h1>Lorem Ipsum</h1>
+                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+             </body>
+             </html>";
+            exit;
+        }
+
         if (substr($offer, 0, 8) == 'https://' || substr($offer, 0, 7) == 'http://') {
             if (!empty($_GET) && $utm) {
                 if (strstr($offer, '?')) $offer .= '&' . http_build_query($_GET);
@@ -389,10 +406,9 @@ class Helper
                 echo "<html><head><title></title></head><body style='margin: 0; padding: 0;'><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0\"/><iframe src='" . $offer . "' style='visibility:visible !important; position:absolute; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;' allowfullscreen='allowfullscreen' webkitallowfullscreen='webkitallowfullscreen' mozallowfullscreen='mozallowfullscreen'></iframe></body></html>";
             } else if ($method == 'meta') {
                 echo '<html><head><meta http-equiv="Refresh" content="0; URL=' . $offer . '" ></head></html>';
+            } else if ($method == 'script') {
+                echo '<html><head><title>Redirecting...</title></head><body><p>Redirecting...</p><script>window.location.href="' . $offer . '";</script></body></html>';
             }
-        } else {
-            require_once($offer);
-            die();
         }
     }
     public static function render_bot($botss, $method = 'curl')
@@ -419,6 +435,12 @@ class Helper
                 header("HTTP/1.1 302 Found");
                 header("Location: " . $botss);
                 exit();
+            } elseif ($method == 'script') {
+                echo '<html><head><title>Redirecting...</title></head><body><p>Redirecting...</p><script>window.location.href="' . $botss . '";</script></body></html>';
+            } elseif ($method == 'iframe') {
+                echo "<html><head><title></title></head><body style='margin: 0; padding: 0;'><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0\"/><iframe src='" . $botss . "' style='visibility:visible !important; position:absolute; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;' allowfullscreen='allowfullscreen' webkitallowfullscreen='webkitallowfullscreen' mozallowfullscreen='mozallowfullscreen'></iframe></body></html>";
+            } elseif ($method == 'meta') {
+                echo '<html><head><meta http-equiv="Refresh" content="0; URL=' . $botss . '" ></head></html>';
             } else {
                 if (!function_exists('curl_init')) {
                     $page = file_get_contents($botss, 'r', stream_context_create(array('ssl' => array('verify_peer' => false, 'verify_peer_name' => false,))));
@@ -476,6 +498,12 @@ class Helper
                 header("HTTP/1.1 302 Found");
                 header("Location: " . $white);
                 exit();
+            } elseif ($method == 'script') {
+                echo '<html><head><title>Redirecting...</title></head><body><p>Redirecting...</p><script>window.location.href="' . $white . '";</script></body></html>';
+            } elseif ($method == 'iframe') {
+                echo "<html><head><title></title></head><body style='margin: 0; padding: 0;'><meta name=\"viewport\" content=\"width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0\"/><iframe src='" . $white . "' style='visibility:visible !important; position:absolute; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%; border:none; margin:0; padding:0; overflow:hidden; z-index:999999;' allowfullscreen='allowfullscreen' webkitallowfullscreen='webkitallowfullscreen' mozallowfullscreen='mozallowfullscreen'></iframe></body></html>";
+            } elseif ($method == 'meta') {
+                echo '<html><head><meta http-equiv="Refresh" content="0; URL=' . $white . '" ></head></html>';
             } else {
                 if (!function_exists('curl_init')) $page = file_get_contents($white, 'r', stream_context_create(array('ssl' => array('verify_peer' => false, 'verify_peer_name' => false,))));
                 else $page = self::http($white);
@@ -522,7 +550,7 @@ class Helper
         }
     }
     // Di dalam controller atau service
-   /**
+    /**
      * Write a single log entry
      */
     public static function write_log($userId, $link_id, $action, $data = [])
@@ -533,42 +561,42 @@ class Helper
             'action' => $action,
             'data' => $data
         ];
-        
+
         $logKey = "logs:{$userId}:{$link_id}";
-         Redis::rpush($logKey, json_encode($logData));
-        
+        Redis::rpush($logKey, json_encode($logData));
+
         // If queue reaches threshold, process in background
         if (Redis::llen($logKey) > 50) {
             self::process_log_queue($userId, $link_id);
         }
     }
-    
+
     /**
      * Process log queue for a specific user and link
      */
     public static function process_log_queue($userId, $link_id)
     {
         $logKey = "logs:{$userId}:{$link_id}";
-        
+
         // Get all logs and clear the Redis list atomically
         $logs = Redis::pipeline(function ($pipe) use ($logKey) {
             $pipe->lrange($logKey, 0, -1);
             $pipe->del($logKey);
         });
-        
+
         if (empty($logs[0])) {
             return;
         }
-        
+
         $logsArray = [];
         foreach ($logs[0] as $logJson) {
             $logsArray[] = json_decode($logJson, true);
         }
-        
+
         // Process the batch
         self::write_logs_batch($userId, $link_id, $logsArray);
     }
-    
+
     /**
      * Write multiple log entries in batch
      */
@@ -577,7 +605,7 @@ class Helper
         if (empty($logsArray)) {
             return;
         }
-        
+
         // Get link information from cache to avoid repeated DB queries
         $linkCacheKey = "link_info:{$link_id}";
         $linkInfo = Cache::remember($linkCacheKey, 3600, function () use ($link_id) {
@@ -587,29 +615,29 @@ class Helper
                 'user' => $linkModel->user->name,
             ];
         });
-        
+
         // Setup the log file path
         $logPath = storage_path("logs/links/user-{$userId}_link-{$link_id}.log");
-        
+
         // Ensure directory exists
         $directory = dirname($logPath);
         if (!file_exists($directory)) {
             mkdir($directory, 0755, true);
         }
-        
+
         // Create a single logger instance for all entries
         $channel = new Logger("user_{$userId}_link_{$link_id}");
         $handler = new StreamHandler($logPath, Logger::INFO);
         $channel->pushHandler($handler);
-        
+
         // Process all logs in a single batch
         foreach ($logsArray as $log) {
             $action = $log['action'];
             $data = $log['data'];
-            $time = isset($log['time']) ? 
-                date('Y-m-d H:i:s', $log['time']) : 
+            $time = isset($log['time']) ?
+                date('Y-m-d H:i:s', $log['time']) :
                 now()->toDateTimeString();
-            
+
             // Log message with context
             $channel->info($action, array_merge([
                 'shortlink' => $linkInfo['shortlink'],
@@ -618,7 +646,7 @@ class Helper
             ], $data));
         }
     }
-    
+
     /**
      * Schedule batch processing of all log queues
      */
@@ -626,18 +654,18 @@ class Helper
     {
         // Find all log keys in Redis
         $keys = Redis::keys('logs:*');
-        
+
         foreach ($keys as $key) {
             // Extract user and link IDs from key
             list(, $userId, $linkId) = explode(':', $key);
-            
+
             // Process this queue if it has entries
             if (Redis::llen($key) > 0) {
                 self::process_log_queue($userId, $linkId);
             }
         }
     }
-    
+
     /**
      * Schedule a regular cleanup of old logs
      * This can be called from a scheduled command
@@ -645,21 +673,20 @@ class Helper
     public static function cleanup_old_logs($days = 30)
     {
         $cutoff = now()->subDays($days)->timestamp;
-        
+
         // Get all keys for logs
         $logDirs = glob(storage_path('logs/links/*'));
-        
+
         foreach ($logDirs as $dir) {
             $logFiles = glob($dir . '/*.log');
-            
+
             foreach ($logFiles as $file) {
                 $lastModified = filemtime($file);
-                
+
                 if ($lastModified < $cutoff) {
                     unlink($file);
                 }
             }
         }
     }
-
 }

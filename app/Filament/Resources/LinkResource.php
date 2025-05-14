@@ -59,7 +59,8 @@ class LinkResource extends Resource implements HasShieldPermissions
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('domain')
+               Forms\Components\Section::make('Domain & Shortlink')->schema([
+                 Forms\Components\Select::make('domain')
                     ->options([
                         'hwhw.pw' => 'hwhw.pw',
                         'hdmx.biz.id' => 'hdmx.biz.id',
@@ -86,29 +87,11 @@ class LinkResource extends Resource implements HasShieldPermissions
                                 $component->state($randomString);
                             })
                     ),
-
-                Forms\Components\TextInput::make('bot_page_url')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('https://trash.hideiyh.pw/?p=BOT_FOUND')
-                    ->helperText('URL where bots/crawlers will be redirected')
-                    ->placeholder('https://example.com/bot-page'),
-
-                Forms\Components\TextInput::make('white_page_url')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('https://trash.hideiyh.pw/?p=WHITE_PAGE')
-                    ->helperText('URL for non-targeted visitors (safe page)')
-                    ->placeholder('https://example.com/safe-page'),
-
-                Forms\Components\TextInput::make('offer_page_url')
-                    ->required()
-                    ->maxLength(255)
-                    ->default('https://trash.hideiyh.pw/?p=OFFER_PAGE')
-                    ->helperText('URL for your main offer/landing page for targeted visitors')
-                    ->placeholder('https://example.com/offer-page'),
-
-                Forms\Components\Select::make('render_bot_page_method')
+                ])->columns(2),
+                    
+                Forms\Components\Section::make('Rendering Method')->schema(
+                    [
+                            Forms\Components\Select::make('render_bot_page_method')
                     ->required()
                     ->options([
                         '302' => 'header 302',
@@ -143,6 +126,33 @@ class LinkResource extends Resource implements HasShieldPermissions
                     ])
                     ->helperText('Choose how to render the offer page for targeted visitors')
                     ->default('302'),
+                    ]
+                    )->columns(3),
+               
+                Forms\Components\Section::make('Setting URL')->schema([
+                     Forms\Components\TextInput::make('bot_page_url')
+                    ->required()
+                    ->maxLength(255)
+                    ->default('https://trash.hideiyh.pw/?p=BOT_FOUND')
+                    ->helperText('URL where bots/crawlers will be redirected')
+                    ->placeholder('https://example.com/bot-page'),
+
+                Forms\Components\TextInput::make('white_page_url')
+                    ->required()
+                    ->maxLength(255)
+                    ->default('https://trash.hideiyh.pw/?p=WHITE_PAGE')
+                    ->helperText('URL for non-targeted visitors (safe page)')
+                    ->placeholder('https://example.com/safe-page'),
+
+                Forms\Components\TextInput::make('offer_page_url')
+                    ->required()
+                    ->maxLength(255)
+                    ->default('https://trash.hideiyh.pw/?p=OFFER_PAGE')
+                    ->helperText('URL for your main offer/landing page for targeted visitors')
+                    ->placeholder('https://example.com/offer-page'),
+                ])->columns(3),
+
+                Forms\Components\Section::make('Setting Rules')->schema([
 
                 Forms\Components\Select::make('allowed_country')
                     ->options(Helper::countryList())
@@ -182,26 +192,27 @@ class LinkResource extends Resource implements HasShieldPermissions
                     ->numeric()
                     ->default(5)
                     ->helperText('Maximum number of redirects allowed to prevent redirection loops'),
+                    ])->columns(2),
+                
+                Forms\Components\Section::make('Setting Block')->schema([
 
                 Forms\Components\Toggle::make('block_no_referer')
                     ->required()
-                    ->columnSpanFull()
                     ->helperText('Block visitors that don\'t have a referrer (direct traffic)'),
 
                 Forms\Components\Toggle::make('block_vpn')
                     ->required()
-                    ->columnSpanFull()
                     ->helperText('Block visitors using VPN or proxy services'),
 
                 Forms\Components\Toggle::make('block_bot')
                     ->required()
-                    ->columnSpanFull()
                     ->helperText('Block detected bots and redirect them to the bot page'),
 
                 Forms\Components\Toggle::make('active')
                     ->required()
                     ->default(true)
                     ->helperText('Toggle to enable or disable this shortlink'),
+                ])->columns(4)
             ]);
     }
     public static function table(Table $table): Table
